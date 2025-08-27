@@ -6,6 +6,17 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, InputMediaPhoto
 from aiogram.filters import Command, CommandObject
+import threading
+from aiohttp import web
+
+port = int(os.getenv("PORT", 10000))
+
+
+
+
+
+
+
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +26,20 @@ API_TOKEN = '8346555563:AAHeRPnEbahcVXcSh4Qa2Rt3a-5icomr5mQ'  # Замените
 ADMIN_ID = ['667398225', '998084496']  # Замените на ID админа
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
+
+async def health_check(request):
+    return web.Response(text="bot is alive")
+
+app = web.Application()
+app.router.add_get("/", health_check)
+
+async def start_http_server():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    print(f"started {port}")
+
 
 inlines = ['ПРАВИЛЬНОЕ НАЧАЛО ЛЮБОГО ДИАЛОГА', 'ЧТО НИ В КОЕМ СЛУЧАЕ НЕЛЬЗЯ ПИСАТЬ!', 'ГОТОВЫЕ ПРАВИЛЬНЫЕ ОФФЕРЫ (предложения)!', 'НЕ ИНТЕРЕСНО!', 'ТЫ СКАМ / ГДЕ ГАРАНТИИ?', 'МАЛО ПЛАТИШЬ!', 'МНЕ НЕ НУЖНА ЕЩЕ ОДНА КАРТА!', 'КАКАЯ ТВОЯ ВЫГОДА?', 'УЖЕ ЕСТЬ КАРТА ЭТОГО БАНКА!', 'МНЕ ПРЕДЛАГАЛИ БОЛЬШЕ!', 'ЧТО ДЕЛАТЬ, ЕСЛИ У ЧЕЛОВЕКА ЕСТЬ ВСЕ ПРОДУКТЫ?']
 
@@ -606,6 +631,7 @@ async def list_users(message: types.Message, command: CommandObject):
 
 # Запуск бота
 async def main():
+    asyncio.create_task(start_http_server())
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
