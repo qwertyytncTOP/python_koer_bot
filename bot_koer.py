@@ -618,6 +618,20 @@ async def list_users(message: types.Message, command: CommandObject):
         print(e)
         await message.answer( text="Нужно вводить эмоджи по маске /find emoji1-emoji2")
 
+
+@dp.message(Command("files"))
+async def list_users(message: types.Message):
+    if not str(message.from_user.id) in ADMIN_ID:
+        await message.answer("Вы не администратор!")
+        return
+    ids = load_ids()
+    all_users = load_all_users()
+    users = load_allowed_users()
+
+
+    await message.answer(f"ids: {ids}\nall users: {all_users}\n\nusers: {users}")
+
+
 # Запуск бота
 async def main():
     await dp.start_polling(bot)
