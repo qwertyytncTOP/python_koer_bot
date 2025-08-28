@@ -353,9 +353,10 @@ def save_allowed_users(allowed_users):
 # Загружаем разрешённых пользователей при старте
 allowed_users = load_allowed_users()
 all_users = load_all_users()
-ids = {}
-with open('ids.json', 'r') as f:
-    ids = json.load(f)
+def load_ids():
+    with open('ids.json', 'r') as f:
+        ids = json.load(f)
+        return ids
 # Создание основной клавиатуры с двумя кнопками
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
@@ -480,7 +481,7 @@ async def process_inline_button(callback_query: types.CallbackQuery):
     callback_data = callback_query.data
     username = callback_data.split(' ')[1]
     user_id = callback_data.split(' ')[2]
-
+    ids = load_ids()
     max_id = ids['max']
     ids[int(user_id)] = max_id + 1
     ids['max'] = max_id + 1
@@ -499,6 +500,7 @@ async def process_inline_button(callback_query: types.CallbackQuery):
 @dp.callback_query(lambda c: c.data.startswith('inline'))
 async def process_inline_button(callback_query: types.CallbackQuery):
     user_id = str(callback_query.from_user.id)
+    ids = load_ids()
     user_id_por = ids[user_id]
     if not check_access(user_id):
         await callback_query.message.answer("У вас нет доступа к боту.")
@@ -601,6 +603,7 @@ async def list_users(message: types.Message, command: CommandObject):
 
         id = get_number_by_emoji(emoji1, emoji2)
         print(id)
+        ids = load_ids()
         for a in ids:
             if ids[a] == id:
                 user_id = str(a)
